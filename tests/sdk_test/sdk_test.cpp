@@ -35,7 +35,9 @@ int main(int argc, char **argv)
 //    EXECUTE_TEST(t.TEST_SwitchAccounts(0, 1), "TEST Switch accounts");
 //    EXECUTE_TEST(t.TEST_ClearHistory(0, 1), "TEST Clear history");
 //    EXECUTE_TEST(t.TEST_EditAndDeleteMessages(0, 1), "TEST Edit & delete messages");
-    EXECUTE_TEST(t.TEST_GroupChatManagement(0, 1), "TEST Groupchat management");
+    int count = 50;
+    while(count--)
+        EXECUTE_TEST(t.TEST_GroupChatManagement(0, 1), "TEST Groupchat management");
 //    EXECUTE_TEST(t.TEST_ResumeSession(0), "TEST Resume session");
 //    EXECUTE_TEST(t.TEST_Attachment(0, 1), "TEST Attachments");
 //    EXECUTE_TEST(t.TEST_SendContact(0, 1), "TEST Send contact");
@@ -1324,7 +1326,7 @@ void MegaChatApiTest::TEST_GroupChatManagement(unsigned int a1, unsigned int a2)
     // now wait for automatic unarchive, due to new message
     if (!waitForResponse(chatArchiveChanged, 5))
     {
-        logger->postLog("Timeout expired for receiving `mcfc` actionpacket. Sending another action...");
+        logger->postLog("Timeout expired for receiving `mcfc` actionpacket. Performing another action to trigger actionpackets...");
         // TODO: Redmine ticket: #10596
         {
             megaChatApi[a1]->updateChatPermissions(chatid, uh, MegaChatRoom::PRIV_STANDARD);
