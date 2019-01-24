@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 //    EXECUTE_TEST(t.TEST_SwitchAccounts(0, 1), "TEST Switch accounts");
 //    EXECUTE_TEST(t.TEST_ClearHistory(0, 1), "TEST Clear history");
 //    EXECUTE_TEST(t.TEST_EditAndDeleteMessages(0, 1), "TEST Edit & delete messages");
-    int count = 50;
+    int count = 10;
     while(count--)
         EXECUTE_TEST(t.TEST_GroupChatManagement(0, 1), "TEST Groupchat management");
 //    EXECUTE_TEST(t.TEST_ResumeSession(0), "TEST Resume session");
@@ -1282,6 +1282,8 @@ void MegaChatApiTest::TEST_GroupChatManagement(unsigned int a1, unsigned int a2)
     ASSERT_CHAT_TEST(!lastErrorChat[a1], "Failed to send user has stopped typing: " + lastErrorMsgChat[a1] + " (" + std::to_string(lastErrorChat[a1]) + ")");
     ASSERT_CHAT_TEST(waitForResponse(flagTyping1), "Timeout expired for sending stop typing notification");
     ASSERT_CHAT_TEST(*uhAction == megaChatApi[a1]->getMyUserHandle(), "My user handle is wrong at stop typing");
+
+    sleep(10);
 
     // --> Archive the chatroom
     chatroom = megaChatApi[a1]->getChatRoom(chatid);
