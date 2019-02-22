@@ -159,6 +159,8 @@ protected:
     bool mNotSupportedAnswer = false;
     bool mIsRingingOut = false;
     bool mHadRingAck = false;
+    uint8_t mMyCapabilities = 0;
+    std::map<chatd::EndpointId, uint8_t> mPeersCapabilities;
     void setState(uint8_t newState);
     void handleMessage(RtMessage& packet);
     void msgSession(RtMessage& packet);

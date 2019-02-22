@@ -1348,6 +1348,14 @@ void Call::msgSession(RtMessage& packet)
     sess->sendOffer();
 
     cancelSessionRetryTimer(sess->mPeer, sess->mPeerClient);
+    // SESSION callid.8 sid.8 anonId.8 encHashKey.32 id.8 renegotiationCapabilities.1
+    uint8_t peerCapabilities = 0;
+    if (packet.payload.size() > 64)
+    {
+        peerCapabilities = packet.payload.read<uint8_t>(64);
+    }
+
+    mPeersCapabilities[peerEndPointId] = peerCapabilities;
 }
 
 void Call::notifyCallStarting(Session &/*sess*/)
@@ -1407,16 +1415,26 @@ void Call::msgJoin(RtMessage& packet)
         SdpKey ownHashKey;
         mManager.random(ownHashKey);
         mManager.crypto().encryptKeyTo(packet.userid, ownHashKey, encKey);
-        // SESSION callid.8 sid.8 anonId.8 encHashKey.32
+        // SESSION callid.8 sid.8 anonId.8 encHashKey.32 id.8 renegotiationCapabilities.1
         mManager.cmdEndpoint(RTCMD_SESSION, packet,
             packet.callid,
             newSid,
             mManager.mOwnAnonId,
             encKey,
-            mId);
+            mId,
+            mMyCapabilities);
 
         mSentSessions[endPointId] = std::make_pair(newSid, ownHashKey);
         cancelSessionRetryTimer(endPointId.userid, endPointId.clientid);
+
+        uint8_t peerCapabilities = 0;
+        // payload: callId.8 anonId.8 Capabilities.1
+        if (packet.payload.size() > 16)
+        {
+            peerCapabilities = packet.payload.read<uint8_t>(16);
+        }
+
+        mPeersCapabilities[endPointId] = peerCapabilities;
     }
     else
     {
@@ -1791,8 +1809,8 @@ bool Call::join(Id userid)
     // join a specific user (used when a session gets broken)
     setState(Call::kStateJoining);
     bool sent = userid
-            ? cmd(RTCMD_JOIN, userid, 0, mId, mManager.mOwnAnonId)
-            : cmdBroadcast(RTCMD_JOIN, mId, mManager.mOwnAnonId);
+            ? cmd(RTCMD_JOIN, userid, 0, mId, mManager.mOwnAnonId, mMyCapabilities)
+            : cmdBroadcast(RTCMD_JOIN, mId, mManager.mOwnAnonId, mMyCapabilities);
     if (!sent)
     {
         asyncDestroy(TermCode::kErrNetSignalling, true);
